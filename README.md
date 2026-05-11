@@ -1,31 +1,28 @@
-# Telegram Drive 
+# Telegram Drive
 
-**Telegram Drive** is an open-source, cross-platform desktop application that turns your Telegram account into an unlimited, secure cloud storage drive. Built with **Tauri**, **Rust**, and **React**.
+Telegram Drive is a local desktop app that uses your Telegram account as file storage. It is built with Tauri 2, Rust, React, TypeScript, Vite, MongoDB, Google OAuth, and the Grammers Telegram client.
+
+Files are stored in Telegram chats/channels. The app provides a local desktop UI, a local HTTP API, user login, admin approval, folder permissions, previews, downloads, and uploads.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20MacOS%20%7C%20Linux-blue)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)
 
+## Features
 
-![Auth Screen](screenshots/AuthScreen.png)
+- Telegram-backed file storage
+- Folder management through Telegram channels
+- Google OAuth login for users
+- Admin user approval, reject, disable, and QR login controls
+- Folder permissions: Hidden, Read Only, Read + Write
+- Owner folders are always Read + Write for their owner
+- Drag-and-drop uploads
+- Image previews and thumbnails
+- Audio, video, and PDF previews
+- Local temp cache for video/PDF preview playback
+- Local REST API for web and desktop sessions
+- Cross-platform desktop app through Tauri
 
-##  What is Telegram Drive?
-
-Telegram Drive leverages the Telegram API to allow you to upload, organize, and manage files directly on Telegram's servers. It treats your "Saved Messages" and created Channels as folders, giving you a familiar file explorer interface for your Telegram cloud.
-
-###  Key Features
-
-*   **Unlimited Cloud Storage**: Utilizing Telegram's generous cloud infrastructure.
-*   **High Performance Grid**: Virtual scrolling handles folders with thousands of files instantly.
-*   **Auto-Updates**: Seamless updates for Windows, macOS, and Linux.
-*   **Media Streaming**: Stream video and audio files directly without downloading.
-*   **PDF Viewer:** Built-in PDF support with infinite scrolling for seamless document reading.
-*   **Drag & Drop**: Intuitive drag-and-drop upload and file management.
-*   **Thumbnail Previews**: Inline thumbnails for images and media files.
-*   **Folder Management**: Create "Folders" (private Telegram Channels) to organize content.
-*   **Privacy Focused**: API keys and data stay local. No third-party servers.
-*   **Cross-Platform**: Native apps for macOS (Intel/ARM), Windows, and Linux.
-
-##  Screenshots
+## Screenshots
 
 | Dashboard | File Preview |
 |-----------|--------------|
@@ -39,108 +36,243 @@ Telegram Drive leverages the Telegram API to allow you to upload, organize, and 
 |----------------|----------------|
 | ![Audio Playback](screenshots/AudioPlayback.png) | ![Video Playback](screenshots/VideoPlayback.png) |
 
-| Auth Code Screen | Upload Example |
-|------------------|-------------|
-| ![Auth Code Screen](screenshots/AuthCodeScreen.png) | ![Upload Example](screenshots/UploadExample.png) |
+## Project Structure
 
-| Folder Creation | Folder List View |
-|-----------------|------------------|
-| ![Folder Creation](screenshots/FolderCreation.png) | ![Folder List View](screenshots/FolderListView.png) |
+```text
+Telegram-Drive/
+|-- frontend/        React/Vite UI, admin console, API client
+|-- backend/         Rust/Tauri app, REST API, Telegram, MongoDB
+|-- shared/          Shared TypeScript types
+|-- screenshots/     README images
+|-- scripts/         Workspace helper scripts
+|-- package.json     Root workspace scripts
+`-- README.md
+```
 
-##  Tech Stack
+## Requirements
 
-*   **Frontend**: React, TypeScript, TailwindCSS, Framer Motion
-*   **Backend**: Rust (Tauri), Grammers (Telegram Client)
-*   **Build Tool**: Vite
+- Node.js 18 or newer
+- Rust and Cargo
+- Tauri system dependencies for your OS
+- MongoDB Atlas or another MongoDB instance
+- Google OAuth client
+- Telegram API ID and API hash from https://my.telegram.org/
 
+### Windows Native Dependencies
 
-##  Getting Started
+Install Visual Studio Build Tools and select:
 
-### Prerequisites
+- Desktop development with C++
+- MSVC build tools
+- Windows SDK
 
-*   **Node.js (v18+)**: [Download here](https://nodejs.org/)
-*   **Rust (latest stable)**: Required to compile the Tauri backend. Install via [rustup](https://rustup.rs/):
-    *   **macOS/Linux:** `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-    *   **Windows:** Download and run `rustup-init.exe` from [rustup.rs](https://rustup.rs/)
-    *   *Verify installation:* run `rustc --version` and `cargo --version` in your terminal.
-*   **OS-Specific Build Tools for Tauri**: 
-    *   **macOS:** Xcode Command Line Tools (`xcode-select --install`).
-    *   **Linux (Ubuntu/Debian):** `sudo apt update && sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev`
-    *   **Windows (CRITICAL):** You **must** install the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). During installation, select the **"Desktop development with C++"** workload. Without this, you will get a `linker 'link.exe' not found` error.
-    *   **Windows (WebView2):** Windows 10/11 users usually have this pre-installed. If not, download the [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section).
-    *   *Reference:* See the official [Tauri v2 Prerequisites Guide](https://v2.tauri.app/start/prerequisites/) for detailed instructions.
-*   **Telegram API Credentials**: You need your own API ID and API Hash to communicate with Telegram's servers.
-    1. Log into [my.telegram.org](https://my.telegram.org).
-    2. Go to "API development tools" and create a new application to get your `api_id` and `api_hash`.
+Windows 10/11 usually include WebView2. If Tauri complains, install Microsoft Edge WebView2 Runtime.
 
-> [!NOTE]  
-> **First-run Compile Time:** The initial build (`npm run tauri dev` or `npm run tauri build`) will download and compile over 300 Rust crates. This process can take **5 to 15 minutes** depending on your hardware. Subsequent builds will be much faster.
+### macOS Native Dependencies
 
-> [!TIP]
-> **NPM Vulnerabilities:** You may see vulnerability warnings during `npm install`. These are usually related to build tools and dev dependencies. You can optionally run `npm audit fix`, but it is not strictly required to run the app.
+```bash
+xcode-select --install
+```
 
-### Installation
+### Ubuntu/Debian Native Dependencies
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/caamer20/Telegram-Drive.git
-    cd Telegram-Drive
-    ```
+```bash
+sudo apt update
+sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+```
 
-2.  **Install Dependencies**
-    ```bash
-    cd app
-    npm install
-    ```
+## Environment Setup
 
-3.  **Run in Development Mode**
-    ```bash
-    npm run tauri dev
-    ```
+Copy the example env files:
 
-4.  **Build/Compile**
-    ```bash
-    npm run tauri build
-    ```
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
 
-##  Open Source & License
+On Windows PowerShell:
 
-This project is **Free and Open Source Software**. You are free to use, modify, and distribute it.
+```powershell
+Copy-Item backend\.env.example backend\.env
+Copy-Item frontend\.env.example frontend\.env
+```
 
-Licensed under the **MIT License**.
+### Backend Environment
 
----
-*Disclaimer: This application is not affiliated with Telegram FZ-LLC. Use responsibly and in accordance with Telegram's Terms of Service.*
+Backend-only secrets belong in `backend/.env`.
 
-If you're looking for a version of this app that's optimized for VPNs check out this repo:
-https://github.com/caamer20/Telegram-Drive-ForVPNs
+Required:
 
-<div align="center">
-  <!-- PayPal -->
-  <div style="margin: 15px 0;">
-    <a href="https://www.paypal.me/Caamer20">
-      <img src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" alt="Donate with PayPal" width="200">
-    </a>
-    <div style="font-size: 14px; margin-top: 8px;">paypal.me/Caamer20</div>
-  </div>
+```text
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-host>/?appName=<app-name>
+MONGODB_DB_NAME=telegram_drive
+JWT_SECRET=<long-random-secret>
+TELEGRAM_SESSION_ENCRYPTION_KEY=<32-byte-base64-or-hex-key>
+GOOGLE_OAUTH_CLIENT_ID=<google-oauth-client-id>
+GOOGLE_OAUTH_CLIENT_SECRET=<google-oauth-client-secret>
+GOOGLE_OAUTH_REDIRECT_URI=http://localhost:1420/auth/google/callback
+```
 
-  <!-- Litecoin -->
-  <div style="margin: 15px 0;">
-    <a href="litecoin:ltc1q6wkr5ac4u0pxx4hx7xgwn0gsaku25ws0df73rp">
-      <img src="https://img.shields.io/badge/Donate-LTC-345D9D?style=for-the-badge&logo=litecoin&logoColor=white" alt="Donate LTC">
-    </a>
-    <div style="font-family: monospace; font-size: 13px; margin-top: 8px; word-break: break-all;">
-      ltc1q6wkr5ac4u0pxx4hx7xgwn0gsaku25ws0df73rp
-    </div>
-  </div>
+Optional but recommended for first-run owner setup:
 
-  <!-- Bitcoin -->
-  <div style="margin: 15px 0;">
-    <a href="bitcoin:bc1q5pt7m2fk6w0dzsnf6vvd5k6nw5k44785286ujy">
-      <img src="https://img.shields.io/badge/Donate-BTC-F7931A?style=for-the-badge&logo=bitcoin&logoColor=white" alt="Donate BTC">
-    </a>
-    <div style="font-family: monospace; font-size: 13px; margin-top: 8px; word-break: break-all;">
-      bc1q5pt7m2fk6w0dzsnf6vvd5k6nw5k44785286ujy
-    </div>
-  </div>
-</div>
+```text
+TELEGRAM_API_ID=123456
+TELEGRAM_API_HASH=your_api_hash
+```
+
+`TELEGRAM_SESSION_ENCRYPTION_KEY` must stay stable. If you change it, the existing encrypted Telegram session file in `backend/.data/telegram.session.enc` cannot be read.
+
+### Frontend Environment
+
+Frontend env values are public. Do not put secrets here.
+
+```text
+VITE_API_BASE_URL=http://localhost:14201
+VITE_GOOGLE_OAUTH_CLIENT_ID=<google-oauth-client-id>
+VITE_GOOGLE_OAUTH_REDIRECT_URI=http://localhost:1420/auth/google/callback
+```
+
+## First Admin Setup
+
+1. Start the app.
+2. Sign in once with Google.
+3. Open MongoDB and update your user document:
+
+```text
+role: "admin"
+approval_status: "approved"
+is_approved: true
+disabled: false
+```
+
+After that, sign in again. The admin console can approve, reject, disable, enable, and manage folder permissions for other users.
+
+## Folder Permissions
+
+Admin folder permissions have three states:
+
+- Hidden: the user cannot see the folder.
+- Read Only: the user can open and download files.
+- Read + Write: the user can upload and move/copy files where allowed.
+
+Folders owned by a user are always Read + Write for that user and cannot be hidden or downgraded in the admin UI.
+
+## Preview Behavior
+
+Video, audio, and PDF previews use a local temp cache. When a preview opens, the backend downloads to the app cache and serves it through the local API. Closing the preview cancels the download and removes the temp file.
+
+Some MP4 files store playback metadata at the end of the file. Telegram Drive also prefetches a small tail section for video files so playback can start earlier when possible.
+
+## Install Dependencies
+
+From the repository root:
+
+```bash
+npm install
+```
+
+## Development
+
+Run the full Tauri desktop app:
+
+```bash
+npm run tauri:dev
+```
+
+Run only the local backend API:
+
+```bash
+npm run dev:api
+```
+
+Run only the Vite frontend:
+
+```bash
+npm run dev:frontend
+```
+
+Run backend API and frontend together without launching Tauri:
+
+```bash
+npm run dev:web
+```
+
+## Build
+
+From the repository root:
+
+```bash
+npm run build
+```
+
+Build outputs are created under:
+
+```text
+backend/target/release/
+backend/target/release/bundle/
+```
+
+Common Windows outputs:
+
+```text
+backend/target/release/app.exe
+backend/target/release/bundle/msi/
+backend/target/release/bundle/nsis/
+```
+
+## Useful Commands
+
+```bash
+npm run build:frontend
+npm run build:backend
+npm run tauri:dev
+npm run tauri:build
+```
+
+## Troubleshooting
+
+### Cargo Not Found
+
+Install Rust from https://rustup.rs/, restart your terminal, then verify:
+
+```bash
+cargo --version
+rustc --version
+```
+
+### `link.exe` Not Found on Windows
+
+Install Visual Studio Build Tools with the Desktop development with C++ workload.
+
+### WebView2 Error on Windows
+
+Install Microsoft Edge WebView2 Runtime.
+
+### Preview or Stream Still Uses Old Behavior
+
+Close every running Telegram Drive window. If an old process still owns port `14201`, it may serve old backend code. Restart the newly built app.
+
+### User Still Sees Hidden Folder
+
+Make sure you saved permissions after setting the folder to Hidden, then sign out and sign in as that user. Users see only assigned folders plus folders they own.
+
+## Tech Stack
+
+- React
+- TypeScript
+- Vite
+- Tauri v2
+- Rust
+- Grammers Telegram client
+- MongoDB
+- Google OAuth
+- Tailwind CSS
+- Framer Motion
+
+## License
+
+This project is released under the MIT License.
+
+## Disclaimer
+
+This application is not affiliated with Telegram FZ-LLC. Use it responsibly and follow Telegram's Terms of Service.
