@@ -31,7 +31,7 @@ import { useFileOperations } from '../hooks/useFileOperations';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { useFileDownload } from '../hooks/useFileDownload';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
-import { nasSession } from '../lib/nasApi';
+import { nasApi } from '../lib/nasApi';
 
 interface DashboardProps {
     onLogout: () => void;
@@ -163,6 +163,7 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
     const [unlockedFolders, setUnlockedFolders] = useState<Set<number>>(() => new Set());
     const [previewContextFiles, setPreviewContextFiles] = useState<TelegramFile[]>([]);
     const [previewContextIndex, setPreviewContextIndex] = useState(-1);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
     useEffect(() => {
         if (store) {
@@ -199,10 +200,10 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
 
     const { data: allFiles = [], isLoading, error } = useQuery({
         queryKey: ['files', activeFolderId],
-        queryFn: () => invoke<any[]>('cmd_get_files', { folderId: activeFolderId }).then(res => res.map(f => ({
+        queryFn: () => nasApi.listTelegramFiles(activeFolderId).then(res => res.map(f => ({
             ...f,
             sizeStr: formatBytes(f.size),
-            type: f.icon_type || (f.name.endsWith('/') ? 'folder' : 'file')
+            type: f.type || (f.name.endsWith('/') ? 'folder' : 'file')
         }))),
         enabled: !!store && hasFolderAccess && activeFolderAllowed && !activeFolderNeedsUnlock,
     });
@@ -433,11 +434,10 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
             try {
                 const idsToMove = selectedIds.includes(fileId) ? selectedIds : [fileId];
 
-                await invoke('cmd_move_files', {
-                    messageIds: idsToMove,
-                    sourceFolderId: activeFolderId,
-                    targetFolderId: targetFolderId,
-                    accessToken: nasSession.getAccessToken()
+                await nasApi.moveTelegramFiles({
+                    message_ids: idsToMove,
+                    source_folder_id: activeFolderId,
+                    target_folder_id: targetFolderId,
                 });
 
                 queryClient.invalidateQueries({ queryKey: ['files', activeFolderId] });
@@ -478,6 +478,7 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
 
     const selectFolder = (folderId: number | null) => {
         if (folderId === null) {
+            setIsMobileSidebarOpen(false);
             setActiveFolderId(null);
             return;
         }
@@ -488,15 +489,13 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
             setFolderUnlock(folder);
             return;
         }
+        setIsMobileSidebarOpen(false);
         setActiveFolderId(folderId);
     };
 
     const unlockFolder = async (password: string) => {
         if (!folderUnlock) return;
-        const ok = await invoke<boolean>('cmd_verify_folder_password', {
-            folderId: folderUnlock.id,
-            password,
-        });
+        const { ok } = await nasApi.verifyTelegramFolderPassword(folderUnlock.id, password);
         if (!ok) {
             setUnlockError("Incorrect folder password.");
             return;
@@ -592,6 +591,8 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
                 folders={visibleFolders}
                 activeFolderId={activeFolderId}
                 setActiveFolderId={selectFolder}
+                mobileOpen={isMobileSidebarOpen}
+                onCloseMobile={() => setIsMobileSidebarOpen(false)}
                 onDrop={handleDropOnFolder}
                 onDelete={handleFolderDelete}
                 onRename={(id) => {
@@ -618,10 +619,11 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
                 showSync={Boolean(currentUser)}
             />
 
-            <main className="flex-1 flex flex-col" onClick={(e) => { if (e.target === e.currentTarget) setSelectedIds([]); }}>
+            <main className="flex min-w-0 flex-1 flex-col" onClick={(e) => { if (e.target === e.currentTarget) setSelectedIds([]); }}>
                 <TopBar
                     currentFolderName={currentFolderName}
                     selectedIds={selectedIds}
+                    onOpenSidebar={() => setIsMobileSidebarOpen(true)}
                     onShowMoveModal={() => setFolderTransferMode('move')}
                     onShowCopyModal={() => setFolderTransferMode('copy')}
                     onBulkDownload={handleBulkDownload}
@@ -650,7 +652,7 @@ export function Dashboard({ onLogout, permissions, allowFolderManagement = true,
                     )}
                 />
                 {searchTerm.length > 2 && (
-                    <div className="px-6 pt-4 pb-0">
+                    <div className="px-3 pt-3 pb-0 sm:px-6 sm:pt-4">
                         <h2 className="text-sm font-medium text-telegram-subtext">
                             Search Results for <span className="text-telegram-primary">"{searchTerm}"</span>
                         </h2>
